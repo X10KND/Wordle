@@ -1,18 +1,18 @@
 export const runtime = "edge";
-import { NextRequest, NextResponse } from "next/server";
 import { db, one, nowMs } from "@/lib/db";
+import { cookieSerialize, json } from "@/lib/http";
 
-export async function POST(req: NextRequest, { params }: { params: { code: string } }) {
+export async function POST(req: Request, { params }: { params: { code: string } }) {
   try {
     const body = await req.json();
     const name = String(body.name || "").trim();
     const code = params.code.toUpperCase();
-    if (!name) return NextResponse.json({ error: "Name required" }, { status: 400 });
+    if (!name) return json({ error: "Name required" }, { status: 400 });
 
     const room = await one<any>(db().prepare(`SELECT * FROM rooms WHERE code = ?1`).bind(code));
-    if (!room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
+    if (!room) return json({ error: "Room not found" }, { status: 404 });
     if (room.status !== "lobby")
-      return NextResponse.json({ error: "Game already started" }, { status: 400 });
+      return json({ error: "Game already started" }, { status: 400 });
 
     const playerId = crypto.randomUUID();
     await db()
@@ -20,11 +20,13 @@ export async function POST(req: NextRequest, { params }: { params: { code: strin
       .bind(playerId, code, name, nowMs())
       .run();
 
-    const res = NextResponse.json({ code });
-    res.cookies.set("pid", playerId, { httpOnly: true, sameSite: "lax", path: "/" });
-    return res;
+    const headers = new Headers();
+    headers.append(
+      "Set-Cookie",
+      cookieSerialize("pid", playerId, { httpOnly: true, sameSite: "lax", path: "/" })
+    );
+    return json({ code }, { headers });
   } catch (e) {
-    return NextResponse.json({ error: "Join failed" }, { status: 500 });
+    return json({ error: "Join failed" }, { status: 500 });
   }
 }
-

@@ -1,7 +1,7 @@
 export const runtime = "edge";
-import { NextRequest, NextResponse } from "next/server";
 import { db, one, nowMs } from "@/lib/db";
 import { randomWords } from "@/lib/words";
+import { cookieSerialize, json } from "@/lib/http";
 
 function codegen() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // no I, O to avoid confusion
@@ -10,13 +10,12 @@ function codegen() {
     .join("");
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const body = await req.json();
     const name = String(body.name || "").trim();
     const rounds = Math.max(3, Math.min(10, Number(body.rounds || 5)));
-    if (!name)
-      return NextResponse.json({ error: "Name required" }, { status: 400 });
+    if (!name) return json({ error: "Name required" }, { status: 400 });
 
     const code = codegen();
     const playerId = crypto.randomUUID();
@@ -45,14 +44,13 @@ export async function POST(req: NextRequest) {
     );
     await db().batch(inserts);
 
-    const res = NextResponse.json({ code });
-    res.cookies.set("pid", playerId, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-    });
-    return res;
+    const headers = new Headers();
+    headers.append(
+      "Set-Cookie",
+      cookieSerialize("pid", playerId, { httpOnly: true, sameSite: "lax", path: "/" })
+    );
+    return json({ code }, { headers });
   } catch (e) {
-    return NextResponse.json({ error: "Create failed" }, { status: 500 });
+    return json({ error: "Create failed" }, { status: 500 });
   }
 }

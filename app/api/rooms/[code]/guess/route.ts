@@ -1,20 +1,19 @@
 export const runtime = "edge";
-import { NextRequest, NextResponse } from "next/server";
 import { db, one, nowMs } from "@/lib/db";
 import { evaluateGuess } from "@/lib/game";
+import { json, parseCookies } from "@/lib/http";
 
-export async function POST(req: NextRequest, { params }: { params: { code: string } }) {
-  const pid = req.cookies.get("pid")?.value;
-  if (!pid) return NextResponse.json({ error: "No player" }, { status: 401 });
+export async function POST(req: Request, { params }: { params: { code: string } }) {
+  const pid = parseCookies(req.headers.get("cookie"))?.pid;
+  if (!pid) return json({ error: "No player" }, { status: 401 });
   const code = params.code.toUpperCase();
   const body = await req.json();
   const guessRaw = String(body.guess || "").toUpperCase();
-  if (!/^[A-Z]{5}$/.test(guessRaw))
-    return NextResponse.json({ error: "Guess must be 5 letters" }, { status: 400 });
+  if (!/^[A-Z]{5}$/.test(guessRaw)) return json({ error: "Guess must be 5 letters" }, { status: 400 });
 
   const room = await one<any>(db().prepare(`SELECT * FROM rooms WHERE code=?1`).bind(code));
-  if (!room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
-  if (room.status !== "in_progress") return NextResponse.json({ error: "Not in game" }, { status: 400 });
+  if (!room) return json({ error: "Room not found" }, { status: 404 });
+  if (room.status !== "in_progress") return json({ error: "Not in game" }, { status: 400 });
 
   // Determine current round for this player
   const latestCompleted = await one<any>(
@@ -32,7 +31,7 @@ export async function POST(req: NextRequest, { params }: { params: { code: strin
   const round = await one<any>(
     db().prepare(`SELECT word FROM rounds WHERE room_code=?1 AND round_index=?2`).bind(code, currentIndex)
   );
-  if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
+  if (!round) return json({ error: "Round not found" }, { status: 404 });
 
   const marks = evaluateGuess(String(round.word), guessRaw);
   await db()
@@ -64,6 +63,5 @@ export async function POST(req: NextRequest, { params }: { params: { code: strin
     }
   }
 
-  return NextResponse.json({ ok: true, marks });
+  return json({ ok: true, marks });
 }
-

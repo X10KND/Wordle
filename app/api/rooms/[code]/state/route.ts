@@ -1,13 +1,13 @@
 export const runtime = "edge";
-import { NextRequest, NextResponse } from "next/server";
 import { db, all, one } from "@/lib/db";
 import { squaresFromMarks } from "@/lib/game";
+import { json, parseCookies } from "@/lib/http";
 
-export async function GET(req: NextRequest, { params }: { params: { code: string } }) {
-  const pid = req.cookies.get("pid")?.value || "";
+export async function GET(req: Request, { params }: { params: { code: string } }) {
+  const pid = parseCookies(req.headers.get("cookie"))?.pid || "";
   const code = params.code.toUpperCase();
   const room = await one<any>(db().prepare(`SELECT * FROM rooms WHERE code=?1`).bind(code));
-  if (!room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
+  if (!room) return json({ error: "Room not found" }, { status: 404 });
 
   const players = await all<any>(db().prepare(`SELECT * FROM players WHERE room_code=?1 ORDER BY joined_at ASC`).bind(code));
   const rounds = await all<any>(db().prepare(`SELECT round_index FROM rounds WHERE room_code=?1 ORDER BY round_index`).bind(code));
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest, { params }: { params: { code: string
     room.status = 'finished';
   }
 
-  return NextResponse.json({
+  return json({
     room: {
       code: room.code,
       status: room.status,

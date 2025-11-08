@@ -1,16 +1,15 @@
 export const runtime = "edge";
-import { NextRequest, NextResponse } from "next/server";
 import { db, one, nowMs } from "@/lib/db";
 import { randomWords } from "@/lib/words";
+import { json, parseCookies } from "@/lib/http";
 
-export async function POST(req: NextRequest, { params }: { params: { code: string } }) {
-  const pid = req.cookies.get("pid")?.value;
-  if (!pid) return NextResponse.json({ error: "No player" }, { status: 401 });
+export async function POST(req: Request, { params }: { params: { code: string } }) {
+  const pid = parseCookies(req.headers.get("cookie"))?.pid;
+  if (!pid) return json({ error: "No player" }, { status: 401 });
   const code = params.code.toUpperCase();
   const room = await one<any>(db().prepare(`SELECT * FROM rooms WHERE code = ?1`).bind(code));
-  if (!room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
-  if (room.creator_player_id !== pid)
-    return NextResponse.json({ error: "Only host can restart" }, { status: 403 });
+  if (!room) return json({ error: "Room not found" }, { status: 404 });
+  if (room.creator_player_id !== pid) return json({ error: "Only host can restart" }, { status: 403 });
 
   // Reset room
   await db().batch([
@@ -26,6 +25,5 @@ export async function POST(req: NextRequest, { params }: { params: { code: strin
   );
   await db().batch(inserts);
 
-  return NextResponse.json({ ok: true });
+  return json({ ok: true });
 }
-
