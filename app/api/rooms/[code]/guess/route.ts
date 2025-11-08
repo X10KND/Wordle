@@ -25,7 +25,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
   );
   const currentIndex = latestCompleted ? Number(latestCompleted.round_index) + 1 : 0;
   if (currentIndex >= Number(room.rounds_count)) {
-    return NextResponse.json({ error: "Game already finished for you" }, { status: 400 });
+    return json({ error: "Game already finished for you" }, { status: 400 });
   }
 
   const round = await one<any>(
