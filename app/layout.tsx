@@ -1,5 +1,6 @@
 import "./globals.css";
 import React from "react";
+export const runtime = "edge";
 
 export const metadata = {
   title: "Wordle Multiplayer",

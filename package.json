@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "cf:build": "npx @cloudflare/next-on-pages@1 --experimental-minify",
+    "cf:build": "npx @cloudflare/next-on-pages@1",
     "cf:preview": "wrangler pages dev .vercel/output/static --compatibility-date=2024-01-01"
   },
   "dependencies": {
@@ -26,4 +26,3 @@
     "typescript": "5.6.2"
   }
 }
-
