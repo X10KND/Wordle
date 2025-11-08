@@ -5,7 +5,7 @@ Dark-mode-only, online multiplayer Wordle with rooms, rounds, and a simple polli
 ## Stack
 - Next.js 14 (App Router), React 18
 - Tailwind CSS
-- Cloudflare Pages with `@cloudflare/next-on-pages`
+- Cloudflare Pages with OpenNext Cloudflare adapter (`@opennextjs/cloudflare`)
 - Cloudflare D1 (SQLite) for persistence
 
 ## Features
@@ -48,7 +48,14 @@ Note: The Next.js dev server won’t connect to D1; for end-to-end local testing
 
 ```bash
 npm run cf:build
-wrangler pages dev .vercel/output/static --d1=WORDLE_DB=wordle_d1
+wrangler pages dev .open-next/cloudflare --compatibility-date=2024-01-01
+```
+
+To test against your remote D1 database (recommended), deploy a Pages Preview so the binding comes from your Pages project configuration:
+
+```bash
+npm run cf:build
+npm run cf:deploy:preview
 ```
 
 ## Cloudflare Pages Deployment
@@ -56,9 +63,9 @@ wrangler pages dev .vercel/output/static --d1=WORDLE_DB=wordle_d1
 1. Push to a Git repo and create a Pages project.
 2. In Pages project settings:
    - Framework preset: None (use the adapter)
-   - Build command: `npx @cloudflare/next-on-pages@1 --experimental-minify`
-   - Build output directory: `.vercel/output/static`
-   - Functions directory: `.vercel/output/functions`
+   - Build command: `npx @opennextjs/cloudflare@latest build`
+   - Build output directory: `.open-next/cloudflare`
+   - Functions directory: (leave blank)
 3. Bind the D1 database in Pages → Settings → Functions → D1 bindings:
    - Variable name: `WORDLE_DB`
    - Select your `wordle_d1` database for both Production and Preview.
@@ -81,4 +88,3 @@ See `migrations/0001_init.sql`.
 - Ensure `WORDLE_DB` binding is configured in both Preview and Production.
 - Migrations must run before the app touches the DB.
 - If API routes error on Pages, check compatibility date (kept in `wrangler.toml`) and the adapter version.
-

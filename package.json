@@ -6,11 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "cf:build": "npx @cloudflare/next-on-pages@1 --experimental-minify",
-    "cf:preview": "wrangler pages dev .vercel/output/static --compatibility-date=2024-01-01"
+    "cf:build": "npx @opennextjs/cloudflare@latest build",
+    "cf:preview": "wrangler pages dev .open-next/cloudflare --compatibility-date=2024-01-01",
+    "cf:deploy:preview": "wrangler pages deploy .open-next/cloudflare --branch preview"
   },
   "dependencies": {
-    "@cloudflare/next-on-pages": "1.13.5",
+    "@opennextjs/cloudflare": "*",
     "next": "14.2.5",
     "react": "18.3.1",
     "react-dom": "18.3.1",
