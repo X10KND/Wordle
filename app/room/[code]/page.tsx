@@ -1,4 +1,5 @@
 "use client";
+export const runtime = "edge";
 import useSWR from "swr";
 import { useEffect, useMemo, useState } from "react";
 import { Board, LetterState } from "@/components/Board";
