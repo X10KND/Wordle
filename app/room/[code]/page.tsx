@@ -1,5 +1,4 @@
 "use client";
-export const runtime = "nodejs";
 import useSWR from "swr";
 import { useEffect, useMemo, useState } from "react";
 import { Board, LetterState } from "@/components/Board";
