@@ -5,14 +5,15 @@ export function db() {
   return env.WORDLE_DB as any;
 }
 
-export async function one<T = any>(stmt: D1PreparedStatement): Promise<T | null> {
-  const res = await stmt.first<T>();
-  return (res as any) ?? null;
+// Loosen types to avoid requiring @cloudflare/workers-types in Next.js TS config
+export async function one<T = any>(stmt: any): Promise<T | null> {
+  const res = await stmt.first();
+  return (res as T) ?? null;
 }
 
-export async function all<T = any>(stmt: D1PreparedStatement): Promise<T[]> {
-  const res = await stmt.all<T>();
-  return (res.results as any) ?? [];
+export async function all<T = any>(stmt: any): Promise<T[]> {
+  const res = await stmt.all();
+  return (res?.results as T[]) ?? [];
 }
 
 export function nowMs() {

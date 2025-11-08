@@ -97,9 +97,7 @@ export default function HomePage() {
             Create Room
           </button>
         </div>
-        <p className="text-neutral-500 text-sm">Dark mode only. Classic 5-letter Wordle.</p>
       </div>
     </main>
   );
 }
-

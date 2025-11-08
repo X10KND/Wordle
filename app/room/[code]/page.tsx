@@ -81,12 +81,15 @@ export default function RoomPage({ params }: { params: { code: string } }) {
           setRows(newRows);
           const newKeys = { ...keyStates };
           target.letters.forEach((ch, i) => {
-            const m = marks[i];
+            const m = marks[i] as "absent" | "present" | "correct";
             const prev = newKeys[ch];
-            if (prev === "correct") return;
-            if (m === "correct") newKeys[ch] = "correct";
-            else if (m === "present") newKeys[ch] = prev === "correct" ? "correct" : "present";
-            else if (!prev) newKeys[ch] = "absent";
+            if (m === "correct") {
+              newKeys[ch] = "correct";
+            } else if (m === "present") {
+              if (prev !== "correct") newKeys[ch] = "present";
+            } else {
+              if (!prev) newKeys[ch] = "absent";
+            }
           });
           setKeyStates(newKeys);
           // prepare next input row
@@ -164,4 +167,3 @@ export default function RoomPage({ params }: { params: { code: string } }) {
     </div>
   );
 }
-
