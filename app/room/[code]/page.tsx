@@ -1,4 +1,5 @@
 "use client";
+export const runtime = "edge";
 import useSWR from "swr";
 import { useEffect, useMemo, useState } from "react";
 import { Board, LetterState } from "@/components/Board";
@@ -22,10 +23,17 @@ export default function RoomPage({ params }: { params: { code: string } }) {
   const isHost = data?.room.isHost;
   const status = data?.room.status || "lobby";
 
-  const [rows, setRows] = useState<{ letters: string[]; states: LetterState[] }[]>(
-    Array.from({ length: 6 }, () => ({ letters: [], states: Array(5).fill("empty") }))
+  const [rows, setRows] = useState<
+    { letters: string[]; states: LetterState[] }[]
+  >(
+    Array.from({ length: 6 }, () => ({
+      letters: [],
+      states: Array(5).fill("empty"),
+    }))
   );
-  const [keyStates, setKeyStates] = useState<Record<string, "absent" | "present" | "correct">>({});
+  const [keyStates, setKeyStates] = useState<
+    Record<string, "absent" | "present" | "correct">
+  >({});
   const [lock, setLock] = useState(false);
 
   useEffect(() => {
@@ -52,7 +60,10 @@ export default function RoomPage({ params }: { params: { code: string } }) {
     const idx = rowIndex === -1 ? 5 : rowIndex;
     const r = current[rowIndex === -1 ? 5 : rowIndex];
     if (k === "DEL") {
-      const targetRow = current.find((rr) => rr.letters.length > 0 && rr.letters.length < 6) || current.find((rr) => rr.letters.length === 5) || current[0];
+      const targetRow =
+        current.find((rr) => rr.letters.length > 0 && rr.letters.length < 6) ||
+        current.find((rr) => rr.letters.length === 5) ||
+        current[0];
       const t = targetRow;
       t.letters = t.letters.slice(0, -1);
       setRows([...current]);
@@ -75,9 +86,14 @@ export default function RoomPage({ params }: { params: { code: string } }) {
         } else {
           const marks = data.marks as ("absent" | "present" | "correct")[];
           const newRows = [...rows];
-          const i = newRows.findIndex((rr) => rr.letters.length === 5 && rr.states[0] === "empty");
+          const i = newRows.findIndex(
+            (rr) => rr.letters.length === 5 && rr.states[0] === "empty"
+          );
           const rowi = i === -1 ? 0 : i;
-          newRows[rowi] = { letters: [...target.letters], states: marks as any };
+          newRows[rowi] = {
+            letters: [...target.letters],
+            states: marks as any,
+          };
           setRows(newRows);
           const newKeys = { ...keyStates };
           target.letters.forEach((ch, i) => {
@@ -94,7 +110,12 @@ export default function RoomPage({ params }: { params: { code: string } }) {
           setKeyStates(newKeys);
           // prepare next input row
           if (marks.every((m: any) => m === "correct")) {
-            setRows(Array.from({ length: 6 }, () => ({ letters: [], states: Array(5).fill("empty") })));
+            setRows(
+              Array.from({ length: 6 }, () => ({
+                letters: [],
+                states: Array(5).fill("empty"),
+              }))
+            );
           }
           mutate();
         }
@@ -117,7 +138,8 @@ export default function RoomPage({ params }: { params: { code: string } }) {
       const af = a.finished ? 0 : 1;
       const bf = b.finished ? 0 : 1;
       if (af !== bf) return af - bf;
-      if (a.totalGuesses !== b.totalGuesses) return a.totalGuesses - b.totalGuesses;
+      if (a.totalGuesses !== b.totalGuesses)
+        return a.totalGuesses - b.totalGuesses;
       return a.totalTimeMs - b.totalTimeMs;
     });
   }, [data]);
@@ -127,13 +149,22 @@ export default function RoomPage({ params }: { params: { code: string } }) {
       <div className="flex flex-col items-center">
         <div className="flex items-center gap-3 mb-3">
           <div className="text-neutral-400 text-sm">Room</div>
-          <div className="px-2 py-1 rounded bg-neutral-900 border border-neutral-800 font-mono">{code}</div>
+          <div className="px-2 py-1 rounded bg-neutral-900 border border-neutral-800 font-mono">
+            {code}
+          </div>
           {isHost && status === "lobby" && (
-            <button className="px-3 py-1 rounded bg-correct" onClick={startGame}>Start</button>
+            <button
+              className="px-3 py-1 rounded bg-correct"
+              onClick={startGame}
+            >
+              Start
+            </button>
           )}
           {isHost && status === "finished" && (
             <form action={`/api/rooms/${code}/restart`} method="post">
-              <button className="px-3 py-1 rounded bg-present" type="submit">New Match</button>
+              <button className="px-3 py-1 rounded bg-present" type="submit">
+                New Match
+              </button>
             </form>
           )}
         </div>
@@ -155,8 +186,12 @@ export default function RoomPage({ params }: { params: { code: string } }) {
                 <div key={p.id} className="flex items-center gap-2 py-1">
                   <div className="w-6 text-neutral-500">{i + 1}.</div>
                   <div className="flex-1">{p.name}</div>
-                  <div className="w-24 text-right">{p.totalGuesses} guesses</div>
-                  <div className="w-28 text-right">{Math.round(p.totalTimeMs / 1000)}s</div>
+                  <div className="w-24 text-right">
+                    {p.totalGuesses} guesses
+                  </div>
+                  <div className="w-28 text-right">
+                    {Math.round(p.totalTimeMs / 1000)}s
+                  </div>
                 </div>
               ))}
             </div>
