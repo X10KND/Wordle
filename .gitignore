@@ -1,0 +1,9 @@
+node_modules
+.wrangler
+.vercel
+.next
+dist
+out
+*.log
+.DS_Store
+

@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  @apply bg-bg text-white antialiased;
+}
+
+.tile {
+  @apply w-14 h-14 border-2 border-neutral-700 flex items-center justify-center text-2xl font-bold uppercase select-none rounded;
+}
+
+.tile.absent { @apply bg-absent border-absent; }
+.tile.present { @apply bg-present border-present; }
+.tile.correct { @apply bg-correct border-correct; }
+
+.keyboard-key {
+  @apply px-3 py-3 rounded bg-key text-sm font-semibold select-none;
+}
+
+.keyboard-key.correct { @apply bg-correct; }
+.keyboard-key.present { @apply bg-present; }
+.keyboard-key.absent { @apply bg-absent; }
+
+.scroll-thin::-webkit-scrollbar { width: 6px; }
+.scroll-thin::-webkit-scrollbar-thumb { background: #2a2a2b; border-radius: 3px; }
+
